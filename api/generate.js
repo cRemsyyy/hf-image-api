@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST requests allowed" });
+    return res.status(405).json({ error: "Only POST allowed" });
   }
 
   const { prompt } = req.body;
@@ -19,18 +19,17 @@ export default async function handler(req, res) {
       }
     );
 
-    const result = await response.json();
+    const data = await response.json();
 
-    // Hugging Face sometimes returns base64 already, check
-    const image_base64 = result?.[0]?.image || result?.image || null;
+    // Hugging Face sometimes returns base64 differently
+    const base64Image = data?.images?.[0] || data?.image || null;
 
-    if (!image_base64) {
+    if (!base64Image) {
       return res.status(500).json({ error: "No image returned" });
     }
 
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json({ image: image_base64 });
+    res.status(200).json({ image: base64Image });
   } catch (err) {
-    res.status(500).json({ error: "Image generation failed", details: err.message });
+    res.status(500).json({ error: err.message });
   }
 }
