@@ -1,20 +1,69 @@
-<script>
-async function generate() {
-  const prompt = document.getElementById("prompt").value;
-  if (!prompt) return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Image Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: white;
+      padding: 20px;
+    }
+    input, button {
+      padding: 12px;
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      background: #6c63ff;
+      color: white;
+      cursor: pointer;
+    }
+    img {
+      margin-top: 15px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      display: block;
+    }
+    #container {
+      max-width: 500px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h2>AI Image Generator</h2>
+    <input id="prompt" placeholder="Describe your image..." />
+    <button onclick="generate()">Generate</button>
+    <img id="result" />
+  </div>
 
-  const res = await fetch("/api/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt })
-  });
+  <script>
+    async function generate() {
+      const prompt = document.getElementById("prompt").value;
+      if (!prompt) return alert("Enter a prompt");
 
-  const data = await res.json();
-  if (!data.image) {
-    alert("Image generation failed");
-    return;
-  }
+      try {
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
 
-  document.getElementById("result").src = "data:image/png;base64," + data.image;
-}
-</script>
+        const data = await res.json();
+        if (!data.image) return alert("Failed to generate image");
+
+        document.getElementById("result").src = "data:image/png;base64," + data.image;
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
